@@ -1,0 +1,16 @@
+{
+  "name": "my-portable-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "build": "tauri build",
+    "build:interactive": "node scripts/prompt.js"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.4.0",
+    "cross-env": "^7.0.3",
+    "inquirer": "^9.2.15"
+  }
+}
