@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通知テスト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        .info {
+            background-color: #d9edf7;
+            color: #31708f;
+            border: 1px solid #bce8f1;
+        }
+    </style>
+</head>
+<body>
+    <h1>ブラウザ通知テスト</h1>
+    
+    <div id="status" class="status info">
+        通知の権限状態を確認中...
+    </div>
+    
+    <button id="checkPermission">権限状態を確認</button>
+    <button id="requestPermission">通知権限を要求</button>
+    <button id="sendNotification" disabled>テスト通知を送信</button>
+    
+    <h2>Tauri通知APIテスト</h2>
+    <button id="tauriNotification">Tauri通知を送信</button>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        const checkBtn = document.getElementById('checkPermission');
+        const requestBtn = document.getElementById('requestPermission');
+        const sendBtn = document.getElementById('sendNotification');
+        const tauriBtn = document.getElementById('tauriNotification');
+        
+        function updateStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        function checkNotificationSupport() {
+            if (!('Notification' in window)) {
+                updateStatus('このブラウザは通知をサポートしていません。', 'error');
+                return false;
+            }
+            return true;
+        }
+        
+        function updatePermissionStatus() {
+            if (!checkNotificationSupport()) return;
+            
+            const permission = Notification.permission;
+            switch (permission) {
+                case 'granted':
+                    updateStatus('通知権限が許可されています。', 'success');
+                    sendBtn.disabled = false;
+                    break;
+                case 'denied':
+                    updateStatus('通知権限が拒否されています。', 'error');
+                    sendBtn.disabled = true;
+                    break;
+                case 'default':
+                    updateStatus('通知権限がまだ要求されていません。', 'info');
+                    sendBtn.disabled = true;
+                    break;
+            }
+        }
+        
+        // 初期化
+        updatePermissionStatus();
+        
+        checkBtn.addEventListener('click', updatePermissionStatus);
+        
+        requestBtn.addEventListener('click', async () => {
+            if (!checkNotificationSupport()) return;
+            
+            try {
+                const permission = await Notification.requestPermission();
+                updatePermissionStatus();
+                
+                if (permission === 'granted') {
+                    updateStatus('通知権限が許可されました！', 'success');
+                } else {
+                    updateStatus('通知権限が拒否されました。', 'error');
+                }
+            } catch (error) {
+                updateStatus(`エラー: ${error.message}`, 'error');
+            }
+        });
+        
+        sendBtn.addEventListener('click', () => {
+            if (Notification.permission === 'granted') {
+                const notification = new Notification('テスト通知', {
+                    body: 'これはブラウザ通知のテストです。',
+                    icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+                    tag: 'test-notification'
+                });
+                
+                notification.onclick = () => {
+                    updateStatus('通知がクリックされました！', 'success');
+                    notification.close();
+                };
+                
+                setTimeout(() => {
+                    notification.close();
+                }, 5000);
+                
+                updateStatus('通知を送信しました。', 'success');
+            } else {
+                updateStatus('通知権限が許可されていません。', 'error');
+            }
+        });
+        
+        // Tauri通知API（利用可能な場合）
+        tauriBtn.addEventListener('click', async () => {
+            try {
+                // TauriのAPIが利用可能かチェック
+                if (window.__TAURI__ && window.__TAURI__.notification) {
+                    await window.__TAURI__.notification.sendNotification({
+                        title: 'Tauri通知',
+                        body: 'これはTauriの通知APIを使用したテストです。'
+                    });
+                    updateStatus('Tauri通知を送信しました。', 'success');
+                } else {
+                    updateStatus('Tauri通知APIが利用できません。', 'error');
+                }
+            } catch (error) {
+                updateStatus(`Tauri通知エラー: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

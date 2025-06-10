@@ -11,6 +11,9 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2.4.0",
     "cross-env": "^7.0.3",
-    "inquirer": "^9.2.15"
+    "inquirer": "^9.3.7"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1"
   }
 }

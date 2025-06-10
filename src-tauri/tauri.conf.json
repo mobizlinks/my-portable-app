@@ -1,0 +1,32 @@
+{
+  "productName": "test-app",
+  "version": "0.1.0",
+  "identifier": "com.mobizlinks.testapp",
+  "build": {
+    "beforeBuildCommand": "",
+    "beforeDevCommand": ""
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Test",
+        "width": 1200,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false,
+        "url": "https://misc.laboradian.com/notification-test/1/"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.ico"
+    ]
+  }
+}
